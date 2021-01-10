@@ -20,7 +20,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         message = reply[4:]
         if cmd == "250":            # checks if username is taken
             ValidInput=True
-        else:
+        elif cmd == "550":
             print("That username is already taken")
 
 
