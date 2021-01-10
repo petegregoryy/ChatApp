@@ -30,8 +30,12 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
 
     #Message send/recieve
-    while True:                 
-        usr = input("> ") 
+    while True:          
+        valid = False
+        while not valid:       
+            usr = input("> ") 
+            if usr != "":
+                valid = True
         sendString = "DATA" + usr           
         s.send(sendString.encode('utf-8'))      #Send
         data = s.recv(1024)
