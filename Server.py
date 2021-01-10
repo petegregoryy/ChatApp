@@ -1,13 +1,18 @@
 import socket
-import threading
+from threading import Thread
 
-_HOST = '127.0.0.1'
+_HOST = '0.0.0.0'
 _PORT = 65432
 
 global users
 users = [""]
 global clients
 clients = []
+
+
+
+
+
 
 def process_message(data, conn):
     string = data.decode("utf-8") # Decode reply
@@ -41,18 +46,19 @@ def process_message(data, conn):
         print(clients)
         for client in clients:
             if client != conn:
+                print(f"Sending {msg} to {client}")
                 client.sendall(str.encode(msg))
         print (f"Sending {msg}")
 
-def ProcessThread(s, sock, addr): # Function for controlling the connection with the socket
-        with sock:
-            print('Connection from ', addr)
-            while True:
-                data = sock.recv(1024) # Receive data
-                process_message(data,sock) # send the data and the socket to be processed
+def ProcessThread(s, socket, addr): # Function for controlling the connection with the socket
+        print('Connection from ', addr)
+        while True:
+            print("Running Process")
+            data = socket.recv(1024) # Receive data
+            process_message(data,socket) # send the data and the socket to be processed
 
-                if not data: # Quit if it doesn't receive data
-                    break
+            if not data: # Quit if it doesn't receive data
+                break
                 # sock.sendall(data)
 while True:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -60,7 +66,7 @@ while True:
         s.listen()
         conn,address = s.accept() # When connection occurs, set conn and adress to the information of the connection
         clients.append(conn)
-        process = threading.Thread(target=ProcessThread, args=(s,conn,address)) # create a thread using the conn and address information
-        process.start() # Run the thread
+        thread1 = Thread(target=ProcessThread,args=(s,conn,address)) # create a thread using the conn and address information
+        thread1.start()
 
 
