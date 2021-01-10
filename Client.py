@@ -6,6 +6,7 @@ import threading
 _HOST = "127.0.0.1"
 _PORT = 65432
 
+<<<<<<< HEAD
 print("What username would you like to use?")
 USERNAME = input(">> ")
 
@@ -34,3 +35,17 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         data = s.recv(1024)
 
         print('Recieved' , repr(data))   #Recieve
+=======
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    _sock = s.connect((_HOST,_PORT))
+    while True:
+        usr = input("> ")
+        s.send(usr.encode('utf-8'))
+        data = s.recv(1024)
+
+        print('Recieved' , repr(data))
+
+# def recieveThread(sock):
+
+# def sendThread(sock):
+>>>>>>> af7f32b97e45b2e48d794760fa8b7ccdcd842165
