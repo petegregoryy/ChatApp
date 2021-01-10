@@ -23,9 +23,9 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         msg = reply[4:]
         print ("CMD: " + cmd)
         print("MSG: " + msg)
-        if cmd == "250":            # checks if username is taken
+        if cmd[0:2] == "250":            # checks if username is taken
             ValidInput=True
-        elif cmd == "550":
+        elif cmd[0:2] == "550":
             print("That username is already taken")
 
 
