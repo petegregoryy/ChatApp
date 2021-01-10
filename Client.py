@@ -6,9 +6,11 @@ import threading
 _HOST = "127.0.0.1"
 _PORT = 65432
 
-<<<<<<< HEAD
-print("What username would you like to use?")
-USERNAME = input(">> ")
+
+        
+
+
+
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:   
     s.connect((_HOST,_PORT))                                      #Opens socket
@@ -18,10 +20,15 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     while ValidInput==False:
         print("What username would you like to use?")
         USERNAME = input(">> ")
-        s.send(b"USER"+USERNAME)
-        reply = s.recv(1024)
+        sendline = "USER"+USERNAME
+        s.send(str.encode(sendline))
+        rData = s.recv(1024)
+
+        reply = rData.decode("utf-8")
         cmd = reply[0:3]            #Formatting
-        message = reply[4:]
+        msg = reply[4:]
+        print ("CMD: " + cmd)
+        print("MSG: " + msg)
         if cmd == "250":            # checks if username is taken
             ValidInput=True
         else:
@@ -30,22 +37,9 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
     #Message send/recieve
     while True:                 
-        usr = input("> ")              
-        s.send(usr.encode('utf-8'))      #Send
+        usr = input("> ") 
+        sendString = "DATA" + usr           
+        s.send(sendString.encode('utf-8'))      #Send
         data = s.recv(1024)
 
         print('Recieved' , repr(data))   #Recieve
-=======
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    _sock = s.connect((_HOST,_PORT))
-    while True:
-        usr = input("> ")
-        s.send(usr.encode('utf-8'))
-        data = s.recv(1024)
-
-        print('Recieved' , repr(data))
-
-# def recieveThread(sock):
-
-# def sendThread(sock):
->>>>>>> af7f32b97e45b2e48d794760fa8b7ccdcd842165
