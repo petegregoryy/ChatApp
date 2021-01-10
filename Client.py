@@ -10,8 +10,9 @@ _PORT = 65432
 
 def sendThread(sock):
     while True:                 
-        usr = input("> ") 
-        sendString = "DATA" + usr           
+        usr = input()
+        MessageFinal = USERNAME + ": " + usr
+        sendString = "DATA" + MessageFinal           
         sock.send(sendString.encode('utf-8'))  #Send
 
 
@@ -53,7 +54,9 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         data = s.recv(1024)
         
         if data != lastdata:
-            print('Recieved' , repr(data))
+            decoded = data.decode("utf-8")
+
+            print(decoded)
             lastdata = data
 
 

@@ -37,8 +37,8 @@ def process_message(data, conn):
             conn.sendall(b'550 User duplicate')
             print ("Sending 550")
     elif command == "DATA": # If the command is DATA, send the message back to the user
-        conn.sendall(str.encode(msg))
-        print(clients)
+        ##conn.sendall(str.encode(msg))
+        ##print(clients)
         for client in clients:
             if client != conn:
                 client.sendall(str.encode(msg))
@@ -53,7 +53,7 @@ def ProcessThread(s, sock, addr): # Function for controlling the connection with
 
                 if not data: # Quit if it doesn't receive data
                     break
-                # sock.sendall(data)
+                ##sock.sendall(data)
 while True:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind((_HOST,_PORT)) # Bind socket and start listening
