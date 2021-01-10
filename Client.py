@@ -6,12 +6,6 @@ import threading
 _HOST = "127.0.0.1"
 _PORT = 65432
 
-
-        
-
-
-
-
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:   
     s.connect((_HOST,_PORT))                                      #Opens socket
 
@@ -31,7 +25,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         print("MSG: " + msg)
         if cmd == "250":            # checks if username is taken
             ValidInput=True
-        else:
+        elif cmd == "550":
             print("That username is already taken")
 
 
