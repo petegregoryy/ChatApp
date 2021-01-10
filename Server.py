@@ -4,9 +4,10 @@ import threading
 _HOST = '127.0.0.1'
 _PORT = 65432
 
-users = []
+global users
+users = [""]
 
-def process_message(data):
+def process_message(data, conn):
     string = data.decode("utf-8")
     command = string[0:4]
     msg = string[4:]
@@ -19,10 +20,14 @@ def process_message(data):
         for user in users:
             if user == msg:
                 unique = False
+                break
             else:
                 unique = True
-                users.append(msg)
+                
         if unique:
+            users.append(msg)
+            print(f"Adding {msg} to users list")
+            print(users)
             conn.sendall(b"250 OK")
             print ("Sending 250 OK")
         else:
@@ -32,22 +37,22 @@ def process_message(data):
         conn.sendall(str.encode(msg))
         print (f"Sending {msg}")
 
-def ProcessThread(s, conn, addr):
-        with conn:
+def ProcessThread(s, sock, addr):
+        with sock:
             print('Connection from ', addr)
             while True:
-                data = conn.recv(1024)
-                process_message(data)
+                data = sock.recv(1024)
+                process_message(data,sock)
 
                 if not data:
                     break
-                # conn.sendall(data)
+                # sock.sendall(data)
 while True:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind((_HOST,_PORT))
         s.listen()
-        conn,addr = s.accept()
-        process = threading.Thread(target=ProcessThread, args=(s,conn,addr))
+        conn,address = s.accept()
+        process = threading.Thread(target=ProcessThread, args=(s,conn,address))
         process.start()
 
 
