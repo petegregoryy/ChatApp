@@ -1,10 +1,20 @@
 import socket
 import threading
+import select
 
 # _HOST = input("What server would you like to connect to: ")
 # _PORT = input("What port is that server on: ")
 _HOST = "127.0.0.1"
 _PORT = 65432
+
+
+def sendThread(sock):
+    while True:                 
+        usr = input("> ") 
+        sendString = "DATA" + usr           
+        sock.send(sendString.encode('utf-8'))  #Send
+
+
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:   
     s.connect((_HOST,_PORT))  #Opens socket
@@ -30,12 +40,22 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         elif cmd == "550":
             print("That username is already taken")
 
+    
+        #Message send/recieve
 
-    #Message send/recieve
-    while True:                 
-        usr = input("> ") 
-        sendString = "DATA" + usr           
-        s.send(sendString.encode('utf-8'))  #Send
+    sThread = threading.Thread(target=sendThread, args=(s,))
+    
+    sThread.start()
+
+    lastdata = ""
+    while True:
+        
         data = s.recv(1024)
+        
+        if data != lastdata:
+            print('Recieved' , repr(data))
+            lastdata = data
 
-        print('Recieved' , repr(data))  #Recieve
+
+
+

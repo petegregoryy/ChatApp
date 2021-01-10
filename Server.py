@@ -6,6 +6,8 @@ _PORT = 65432
 
 global users
 users = [""]
+global clients
+clients = []
 
 def process_message(data, conn):
     string = data.decode("utf-8") # Decode reply
@@ -36,6 +38,10 @@ def process_message(data, conn):
             print ("Sending 550")
     elif command == "DATA": # If the command is DATA, send the message back to the user
         conn.sendall(str.encode(msg))
+        print(clients)
+        for client in clients:
+            if client != conn:
+                client.sendall(str.encode(msg))
         print (f"Sending {msg}")
 
 def ProcessThread(s, sock, addr): # Function for controlling the connection with the socket
@@ -53,6 +59,7 @@ while True:
         s.bind((_HOST,_PORT)) # Bind socket and start listening
         s.listen()
         conn,address = s.accept() # When connection occurs, set conn and adress to the information of the connection
+        clients.append(conn)
         process = threading.Thread(target=ProcessThread, args=(s,conn,address)) # create a thread using the conn and address information
         process.start() # Run the thread
 
