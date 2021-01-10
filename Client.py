@@ -4,7 +4,7 @@ import select
 
 # _HOST = input("What server would you like to connect to: ")
 # _PORT = input("What port is that server on: ")
-_HOST = "192.168.1.155"
+_HOST = "localhost"
 _PORT = 65432
 
  
@@ -55,7 +55,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         
         if data != lastdata:
             decoded = data.decode("utf-8")
-
             print(decoded)
             lastdata = data
 
