@@ -7,7 +7,7 @@ _HOST = "127.0.0.1"
 _PORT = 65432
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:   
-    s.connect((_HOST,_PORT))                                      #Opens socket
+    s.connect((_HOST,_PORT))  #Opens socket
 
     #Username 
     ValidInput=False
@@ -19,25 +19,23 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         rData = s.recv(1024)
 
         reply = rData.decode("utf-8")
-        cmd = reply[0:3]            #Formatting
+        cmd = reply[0:3]  #Formatting
         msg = reply[4:]
         print ("CMD: " + cmd)
         print("MSG: " + msg)
-        if cmd[0:3] == "250":            # checks if username is taken
+
+
+        if cmd == "250":  # checks if username is taken
             ValidInput=True
-        elif cmd[0:3] == "550":
+        elif cmd == "550":
             print("That username is already taken")
 
 
     #Message send/recieve
-    while True:          
-        valid = False
-        while not valid:       
-            usr = input("> ") 
-            if usr != "":
-                valid = True
+    while True:                 
+        usr = input("> ") 
         sendString = "DATA" + usr           
-        s.send(sendString.encode('utf-8'))      #Send
+        s.send(sendString.encode('utf-8'))  #Send
         data = s.recv(1024)
 
-        print('Recieved' , repr(data))   #Recieve
+        print('Recieved' , repr(data))  #Recieve
