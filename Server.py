@@ -1,72 +1,89 @@
-import socket
-from threading import Thread
+import select, socket, sys
+try:
+    import Queue
+except ImportError:
+    import queue as Queue
 
-_HOST = '0.0.0.0'
-_PORT = 65432
-
-global users
-users = [""]
-global clients
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.setblocking(0)
+server.bind(('', 65432))
+server.listen(5)
+print(f"listening")
+inputs = [server]
 clients = []
+outputs = []
+usernames = {}
+message_queues = {}
 
-
-
-
-
-
-def process_message(data, conn):
-    string = data.decode("utf-8") # Decode reply
-    command = string[0:4] # Get first 4 letters for command
-    msg = string[4:] # Get rest of string
-    # Print them
-    print ("CMD: " + command) 
-    print("MSG: " + msg)
-
-
-    if command == "USER": # Check if the command was a USER command
-        unique = True # Create Unique
-        for user in users: # For each user in the users list check if it matches the message, if it does, the name isnt unique
-            if user == msg:
-                unique = False
-                break
+while inputs:
+    readable, writable, exceptional = select.select(
+        inputs, outputs, inputs)
+    for s in readable:
+        if s is server:
+            connection, client_address = s.accept()
+            print(f"Accepted connection from {client_address}")
+            connection.setblocking(0)
+            inputs.append(connection)
+            clients.append(connection)
+            message_queues[connection] = Queue.Queue()
+        else:
+            try:
+                data = s.recv(1024)
+            except ConnectionResetError:
+                print("Peer disconnected")
+                clients.remove(s)
+                s.close()
+                inputs.remove(s)
+                for client in clients:
+                    message_queues[client].put(str.encode(usernames[s] + " left the chat."))
+                    if client not in outputs:
+                        outputs.append(client)
+                del message_queues[s]
             else:
-                unique = True
-                
-        if unique: # If the name is unique, append the username to the users list, print that and send an OK response
-            users.append(msg)
-            print(f"Adding {msg} to users list")
-            print(users)
-            conn.sendall(b"250 OK")
-            print ("Sending 250 OK")
-        else: # Otherwise, send a 550 to show an error
-            conn.sendall(b'550 User duplicate')
-            print ("Sending 550")
-    elif command == "DATA": # If the command is DATA, send the message back to the user
-        conn.sendall(str.encode(msg))
-        print(clients)
-        for client in clients:
-            if client != conn:
-                print(f"Sending {msg} to {client}")
-                client.sendall(str.encode(msg))
-        print (f"Sending {msg}")
+                data_decoded = data.decode("utf-8")
+                print(f"recieved {data_decoded}")
 
-def ProcessThread(s, socket, addr): # Function for controlling the connection with the socket
-        print('Connection from ', addr)
-        while True:
-            print("Running Process")
-            data = socket.recv(1024) # Receive data
-            process_message(data,socket) # send the data and the socket to be processed
+                if data:
+                    if data_decoded[0:4] == "USER":
+                        message_queues[s].put(b"250 OK")
+                        usernames[s] = data_decoded[4:]# message_queues[s].put(data)
+                        for client in clients:
+                            message_queues[client].put(str.encode(usernames[s] + " joined the chat!"))
+                            if client not in outputs:
+                                outputs.append(client)
+                        print(usernames)
+                        if s not in outputs:
+                            outputs.append(s)
 
-            if not data: # Quit if it doesn't receive data
-                break
-                # sock.sendall(data)
-while True:
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind((_HOST,_PORT)) # Bind socket and start listening
-        s.listen()
-        conn,address = s.accept() # When connection occurs, set conn and adress to the information of the connection
-        clients.append(conn)
-        thread1 = Thread(target=ProcessThread,args=(s,conn,address)) # create a thread using the conn and address information
-        thread1.start()
+                    elif data_decoded[0:4] == "DATA":
+                        print(clients)
+                        for client in clients:
+                            message_queues[client].put(str.encode(usernames[s] + ": " + data_decoded[4:]))
+                            if client not in outputs:
+                                outputs.append(client)
+                        # message_queues[s].put(str.encode(data_decoded[4:]))
+                        if s not in outputs:
+                            outputs.append(s)
+                else:
+                    if s in outputs:
+                        outputs.remove(s)
+                    inputs.remove(s)
+                    s.close()
+                    del message_queues[s]
 
+    for s in writable:
+        try:
+            next_msg = message_queues[s].get_nowait()
+            print(f"sending {next_msg}")
+        except Queue.Empty:
+            outputs.remove(s)
+        else:
+            s.send(next_msg)
 
+    for s in exceptional:
+        inputs.remove(s)
+        clients.remove(s)
+        if s in outputs:
+            outputs.remove(s)
+        s.close()
+        del message_queues[s]
