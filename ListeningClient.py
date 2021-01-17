@@ -8,15 +8,8 @@ _HOST = "192.168.1.155"
 _PORT = 65432
 
 
-def sendThread(sock):
-    lastdata = ""
-    while True:
-        
-        data = sock.recv(1024)
-        
-        if data != lastdata:
-            print(data.decode("utf-8"))
-            lastdata = data
+
+
 
 
 
@@ -33,13 +26,13 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         rData = s.recv(1024)
 
         reply = rData.decode("utf-8")
-        cmd = reply[0:6]  #Formatting
-        msg = reply[6:]
-        print ("CMD: " + cmd)
+        cmd = reply[0:3]  # Formatting
+        msg = reply[4:]
+        print("CMD: " + cmd)
         print("MSG: " + msg)
 
 
-        if cmd == "USRLST":  # checks if username is taken
+        if cmd == "250":  # checks if username is taken
             ValidInput=True
         elif cmd == "550":
             print("That username is already taken")
@@ -47,14 +40,22 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     
         #Message send/recieve
 
-    sThread = threading.Thread(target=sendThread, args=(s,))
+    #sThread = threading.Thread(target=sendThread, args=(s,))
     
-    sThread.start()
-    
-    while True:                 
-        usr = input("> ") 
-        sendString = "DATA" + usr           
-        s.send(sendString.encode('utf-8'))  #Send
+   # sThread.start()
+
+    lastdata = ""
+    while True:
+
+        data = s.recv(1024)
+        print(data.decode("utf-8"))
+        lastdata = data
+
+
+    #while True:
+     #   usr = input("> ")
+      #  sendString = "DATA" + usr
+      #  s.send(sendString.encode('utf-8'))  #Send
 
 
 
