@@ -15,22 +15,19 @@ outputs = []
 usernames = {}
 message_queues = {}
 
+usernames["server"] = "Server"
+
 def Disconnect(s):
     print("Peer disconnected")
     clients.remove(s)
-
     s.close()
     inputs.remove(s)
-    for client2 in clients:
-        leaveMessage = str.encode(usernames[s] + " left the chat.")
-        combinedlist.remove(usernames[s])
-        print(combinedlist)
-        combined = '|'.join(combinedlist)
-        message_queues[client2].put(str.encode("USRLST|" + combined))
-
-        message_queues[client2].put(leaveMessage)
-        if client2 not in outputs:
-            outputs.append(client2)
+    for client in clients:
+        message_queues[client].put(str.encode(usernames[s] + " left the chat."))
+        if client not in outputs:
+            outputs.append(client)
+    print(f"Removing {usernames[s]} from usernames")
+    usernames.pop(s)
     del message_queues[s]
 
 while inputs:
@@ -48,15 +45,7 @@ while inputs:
             try:
                 data = s.recv(1024)
             except Exception:
-                print("Peer disconnected")
-                clients.remove(s)
-                s.close()
-                inputs.remove(s)
-                for client in clients:
-                    message_queues[client].put(str.encode(usernames[s] + " left the chat."))
-                    if client not in outputs:
-                        outputs.append(client)
-                del message_queues[s]
+                Disconnect(s)
             else:
                 data_decoded = data.decode("utf-8")
                 print(f"recieved {data_decoded}")
@@ -74,7 +63,7 @@ while inputs:
                             try:
                                 if client != s:
                                     message_queues[client].put(str.encode(usernames[s] + " joined the chat!"))
-                                message_queues[client].put(str.encode("USRLST|" + combined))
+                                message_queues[client].put(str.encode(f"250 LIST|{combined}"))
                                 if client not in outputs:
                                     outputs.append(client)
                             except KeyError:
@@ -94,22 +83,27 @@ while inputs:
                         # message_queues[s].put(str.encode(data_decoded[4:]))
                         if s not in outputs:
                             outputs.append(s)
+
+                    elif data_decoded[0:4] == "LIST":
+                        combinedlist = []
+                        for users in usernames:
+                            combinedlist.append(usernames[users])
+                        combined = '|'.join(combinedlist)
+                        message_queues[s].put(str.encode(f"250 LIST|{combined}"))
+                        if s not in outputs:
+                            outputs.append(s)
                 else:
-                    if s in outputs:
-                        outputs.remove(s)
-                    inputs.remove(s)
-                    for client in clients:
-                        message_queues[client].put(str.encode(usernames[s] + " left the chat."))
-                    clients.remove(s)
-                    usernames.pop(s)
-                    combinedlist = []
-                    for users in usernames:
-                        combinedlist.append(usernames[users])
-                    combined = '|'.join(combinedlist)
-                    for client in clients:
-                        message_queues[client].put(str.encode("USRLST|" + combined))
-                    s.close()
-                    del message_queues[s]
+                    Disconnect(s)
+                    #if s in outputs:
+                    #    outputs.remove(s)
+                    #inputs.remove(s)
+                    #for client in clients:
+                    #    message_queues[client].put(str.encode(usernames[s] + " left the chat."))
+                    #clients.remove(s)
+                    #usernames.pop(s)
+
+                    #s.close()
+                    #del message_queues[s]
 
     for s in writable:
         try:
