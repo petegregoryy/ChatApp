@@ -14,3 +14,4 @@ Anything sent following a data command will be sent to all connected clients, in
 -LIST: 
 This lists the usernames of currently connected users.
 
+A GUI client for Windows is available here: https://github.com/petegregoryy/ChatAppGUI
