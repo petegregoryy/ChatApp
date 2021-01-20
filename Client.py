@@ -33,13 +33,13 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         rData = s.recv(1024)
 
         reply = rData.decode("utf-8")
-        cmd = reply[0:6]  #Formatting
-        msg = reply[6:]
+        cmd = reply[0:3]  #Formatting
+        msg = reply[3:]
         print ("CMD: " + cmd)
         print("MSG: " + msg)
 
 
-        if cmd == "USRLST":  # checks if username is taken
+        if cmd == "250":  # checks if username is taken
             ValidInput=True
         elif cmd == "550":
             print("That username is already taken")
