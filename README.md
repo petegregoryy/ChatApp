@@ -5,10 +5,12 @@ This is the python client and server repository, with releases of the server cor
 
 Feel free to develop your own clients for this.  Currently the server supports 3 commands:
 
--USER
+-USER: 
 This should be the first command sent on connection, including the username for the client.
--DATA
+
+-DATA: 
 Anything sent following a data command will be sent to all connected clients, including the client it was sent from.
--LIST
+
+-LIST: 
 This lists the usernames of currently connected users.
 
