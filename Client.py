@@ -2,9 +2,9 @@ import socket
 import threading
 import select
 
-# _HOST = input("What server would you like to connect to: ")
+_HOST = input("What server would you like to connect to: ")
 # _PORT = input("What port is that server on: ")
-_HOST = "192.168.1.155"
+# _HOST = "localhost"
 _PORT = 65432
 
 
